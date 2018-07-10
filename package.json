@@ -14,6 +14,16 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js"
   },
-  "author": "",
+  "engines": {
+    "node": "8.11.1"
+  },
+  "keywords": [
+    "Bookmark",
+    "App",
+    "PWA",
+    "Share",
+    "All"
+  ],
+  "author": "Vipul Bhardwaj",
   "license": "ISC"
 }
