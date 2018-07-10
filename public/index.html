@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+<style>
+	.container {
+		max-width: 90%;
+		margin: 10px auto;
+		font-size: 16px;
+		height: 100%;
+	}
+
+	.header {
+		height: 60px;
+		display: flex;
+		flex-wrap: nowrap;
+		justify-content: space-between;
+		align-items: center;
+		flex-direction: row;
+		padding: 0px 8px;
+	}
+
+	.addNew {
+		font-size: 40px;
+		position: absolute;
+		right: 16px;
+		bottom: 8px;
+		background: orange;
+		color: white;
+		width: 56px;
+		height: 56px;
+		text-align: center;
+		border-radius: 50%;
+	}
+
+	.modal {
+		visibility: hidden;
+		width: 70%;
+		position: absolute;
+		bottom: 130px;
+		right: 12px;
+		background: #efefef;
+		text-align: center;
+		border-radius: 4px;
+		padding: 40px;
+	}
+
+	.modal input {
+		border: 1px solid lightgrey;
+		border-radius: 5px;
+		width: 80%;
+		margin: 10px 0px;
+		padding: 20px;
+	}
+
+	.modal button {
+		width: 100%;
+		padding: 8px 12px;
+		border: 1px solid lightblue;
+		background: orange;
+		border-radius: 4px;
+	}
+
+	.listContainer {
+		height: 81vh;
+		list-style: none;
+		padding: 0px 2px;
+		margin: 0px;
+		font-size: 20px;
+		overflow-y: scroll;
+	}
+
+	.listContainer li {
+		display: flex;
+		flex-flow: nowrap;
+		justify-content: space-between;
+		margin-bottom: 15px;
+		margin-top: 30px;
+		padding-left: 15px;
+		padding-top: 5px;
+		padding-right: 15px;
+		padding-bottom: 5px;
+	}
+
+	.control {
+		display: flex;
+		flex-flow: nowrap;
+		justify-content: space-around;
+		align-items: center;
+	}
+
+	.control button {
+		border-radius: 2px;
+		border: 0px solid lightgrey;
+		font-size: 20px;
+		background: #f37329;
+		color: white;
+		margin-right: 18px;
+	}
+
+	.error {
+		background: red;
+	}
+</style>
+
+<body>
+
+	<script>
+		const app = angular.module("myBookmarkApp", []);
+		app.controller("myCtrl", function ($scope, $http) {
+			$scope.loginError = "";
+			const config = {
+				headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+			}
+			let userId = undefined;
+			$scope.userFormShow = () => {
+				if($scope.userId) {
+					document.getElementById('mainPage').style.display = "block";
+					document.getElementById('loginPage').style.display = "none";	
+				} else {
+					document.getElementById('mainPage').style.display = "none";
+					document.getElementById('loginPage').style.display = "block";
+				}
+			}
+			$scope.data = [];
+			$scope.getData = (userId) => {
+				console.log("[User id is ]", userId);
+				$http.get(`/bookmark/user/${userId}`)
+					.then((data) => {
+						$scope.data = data.data.data;
+					});
+			}
+			$scope.login = () => {
+				let loginDetails = {
+					name: $scope.username,
+					pass: $scope.password
+				}
+				console.log(loginDetails)
+				$http({
+            url: '/login',
+						method: "POST",
+						data: loginDetails
+        })
+				.then((data)=>{
+					console.log(data);
+					if(! (data.data.login === false)) {
+						$scope.userId = data.data.data[0]._id;
+						$scope.getData($scope.userId);
+						$scope.userFormShow();
+					} else {
+						$scope.loginError = "Incorrect username or password";
+					}
+				}, (err) => {
+					console.log(err);
+					$scope.loginError = err;
+					$scope.userFormShow();
+				});
+			}
+			$scope.addItem = () => {
+				$scope.errortext = "";
+				if (!$scope.bname) {
+					$scope.errortext = "Name is required";
+					return;
+				}
+				if (!$scope.url) {
+					$scope.errortext = "Url is required";
+					return;
+				}
+				$http({
+					url: '/bookmark/add',
+					method: "POST",
+					data: {
+						userId: $scope.userId,
+						name: $scope.bname,
+						url: $scope.url
+					}
+				})
+				.then((data)=>{
+					$scope.getData($scope.userId);
+				},(err)=> {
+					console.log(err);
+					$scope.errortext = "Something went wrong";
+				});
+				$scope.bname = "";
+				$scope.url = "";
+				visible = !visible;
+				document.getElementById('form').style.visibility = "hidden";
+			}
+
+			$scope.removeItem = function (x) {
+				$scope.errortext = "";
+				let id = $scope.data[x]._id;
+				$http.delete(`bookmark/${id}`,'')
+				.then((data)=>{
+					$scope.getData($scope.userId);
+				},(err)=>{
+					console.log(err);
+				});
+			}
+			$scope.goToUrl = (x) => {
+				window.location.href = $scope.data[x].url;
+			}
+			$scope.userFormShow();
+		});
+	</script>
+
+	<div ng-app="myBookmarkApp" ng-cloak ng-controller="myCtrl" id="container" class="container">
+		<div id="loginPage">
+			<input type="text" ng-model="username" placeholder="Username" required>
+			<input type="password" ng-model="password" placeholder="Password" required>
+			<p> {{loginError}}</p>
+			<button ng-click="login()">Login</button>
+		</div>
+		<div id="mainPage">
+			<header class="header">
+				<div class="logo">BOOK</div>
+				<h3 style="font-size: 20px;">ICON</h3>
+			</header>
+			<ul class="listContainer">
+				<li ng-repeat="x in data" class="">
+					{{x.name}}
+					<div class="control">
+						<button class="" ng-click="goToUrl($index)">Go</button>
+						<span ng-click="removeItem($index)" style="cursor:pointer;margin-left: 5px;font-size: 24px;" class="">&#x2717;</span>
+					</div>
+				</li>
+			</ul>
+			<div class="modal" id="form">
+				<div class="">
+					<div class="">
+						<input style="margin: 10px 0px;" placeholder="Bookmark Name" ng-model="bname" class="" required>
+					</div>
+					<div class="">
+						<input style="margin: 10px 0px;" placeholder="Bookmark Url" ng-model="url" class="" required>
+					</div>
+					<div class="" style="display: block;width: 100%">
+						<button id="add" ng-click="addItem()" class="" style="width: 100%">Add</button>
+					</div>
+				</div>
+				<p class="error">{{errortext}}</p>
+			</div>
+		</div>
+		<div class="addNew" id="addButton">+</div>
+	</div>
+
+	<script>
+		let visible = false;
+		document.getElementById("addButton").addEventListener('click', () => {
+			console.log('clicked');
+			visible = !visible;
+			console.log(visible);
+			document.getElementById("form").style.visibility = visible ? "visible" : "hidden";
+		});
+
+
+
+		const form = document.getElementById("form");
+
+		// Execute a function when the user releases a key on the keyboard
+		form.addEventListener("keyup", (event) => {
+			// Cancel the default action, if needed
+			event.preventDefault();
+			// Number 13 is the "Enter" key on the keyboard
+			if (event.keyCode === 13) {
+				// Trigger the button element with a click
+				document.getElementById("add").click();
+			}
+		});
+	</script>
+</body>
+
+</html>
