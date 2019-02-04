@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Registeration form</title>
+	<link rel="stylesheet" type="text/css" href="style1.css">
+
+	
+<script src="https://code.angularjs.org/1.2.1/angular.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+</head>
+<body>
+
+
+
+<script type="text/javascript">
+	
+		const app = angular.module("myBookmarkApp", []);
+
+		app.controller("myCtrlReg", function ($scope, $http) {
+			$scope.regError = "";
+			$scope.addUser = () => {
+				let regDetails = {
+					name: $scope.username,
+					pass: $scope.password
+				}
+				console.log(regDetails)
+				$http({
+					url: '/user/add',
+					method: "POST",
+					data: regDetails
+        		})
+				.then((data)=>{
+					console.log(data);
+					$scope.loginError = "Account created successfully";
+					window.location.href = '/';
+				}, (err) => {
+					console.log(err);
+					$scope.loginError = err;
+				});
+			}
+
+		});
+function ValidateEmail(inputText)
+{
+var mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+if(inputText.value.match(mailformat))
+{
+document.form1.text1.focus();
+return true;
+}
+else
+{
+alert("You have entered an invalid email address!");
+document.form1.text1.focus();
+return false;
+}
+}
+</script>
+
+
+
+
+	<div ng-app="myBookmarkApp" ng-cloak ng-controller="myCtrlReg" class="container">
+		
+		<h1>registraction form</h1>
+		<form name="frm">
+
+
+		<div class="register">
+			<h2>register here</h2>
+			<label> user name :</label><br>
+			<input type="text" name="user name" id="name" ng-model="username" required placeholder="Enter your  name">
+			
+			<br><br>
+
+
+
+			<label> Mobile Number :</label><br>
+			<select id="ph">
+				<option>+91</option>
+				<option>+92</option>
+				<option>+93</option>
+				<option>+94</option>
+				<option>+95</option>
+			</select>
+			<input placeholder="Enter your mobile number" type="number"
+			 name="number"
+			  ng-model="user.number" required
+			  ng-maxlength="10"
+			  ng-minlength="10" />
+			  <span ng-show="frm.number.$error.required">required 10 digits number</span>
+			  <span ng-show="frm.number.$error.minlength">required 10 digits.</span>
+			  <span ng-show="frm.number.$error.maxlength">max 10 digits</span>
+			  <br><br>
+
+
+
+<div>
+			<label for=""> Email :</label><br>
+			<input type="email" name="email" id="email" placeholder="Enter your email" ng-model="user.email" required>
+			<span style="color: red; font-size: 25px;" ng-show="frm.email.$dirty && frm.email.$error.required">required email</span>
+			<span style="color: red; font-size: 25px;" ng-show="frm.email.$dirty && frm.email.$error.email">it not a valid email</span><br><br>
+
+</div>
+
+			<label> Password :</label><br>
+			<input name="pass"
+			 
+			  ng-minlength="5"
+			  ng-maxlength="10"  type="password" name="pass" id="password" ng-model="password" required placeholder="Enter your password">
+			  <span ng-show="frm.password.$error.required">required max5 digit password</span><br><br>
+			<p> {{regError}}</p>
+
+
+
+			
+			<button  id="button" ng-click="addUser();" ng-disabled="frm.$invalid">Create Account</button>
+		</div>	
+	</div>
+</form>
+</body>
+</html>

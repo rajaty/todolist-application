@@ -9,15 +9,10 @@ const BookmarkSchema = new mongoose.Schema({
     },
     name: {
         type: String,
-        required : true,
         trim: true,
         unique: true
     },
-    url: {
-        type: String,
-        required: true,
-        trim: true
-    }
+   
 },{collection: 'Bookmark'});
 
 

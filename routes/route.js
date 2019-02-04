@@ -97,6 +97,7 @@ router.get('/bookmark/:bookmarkId',(req,res) => {
         } else {
             res.send({data, ...{status: "ok"}});
         }
+        
     });
 });
 
@@ -115,7 +116,7 @@ router.post('/bookmark/add', (req, res) => {
     let bookmark = new Bookmark({
         userId: req.body.userId,
         name: req.body.name,
-        url: req.body.url
+        
     });
     bookmark.save().then((data) => {
         res.send({data, ...{status: "ok"}})
@@ -133,9 +134,7 @@ router.put('/bookmark/:bookmarkId', (req, res) => {
     if(req.body.name) {
         update['name'] = req.body.name;
     }
-    if(req.body.url) {
-        update['url'] = req.body.url;
-    }
+   
     Bookmark.findOneAndUpdate({_id: req.params.bookmarkId},{$set:update}, {new: true},(err, data) => {
         if(err) {
             console.log(err);
